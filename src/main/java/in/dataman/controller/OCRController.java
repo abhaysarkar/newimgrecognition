@@ -1,9 +1,8 @@
 package in.dataman.controller;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,10 +15,17 @@ public class OCRController {
     public String extractText(@RequestParam("file") MultipartFile file) throws IOException {
         // Create a Tesseract instance
         Tesseract tesseract = new Tesseract();
-
-        // Set the Tesseract data path for local execution
-        String localTessDataPath = new File("src/main/resources/Tesseract-OCR/tessdata").getAbsolutePath();
-        tesseract.setDatapath(localTessDataPath);
+        
+        // Detect if running on Heroku or local environment
+        String tessDataPath;
+        if (System.getenv("DYNO") != null) {
+            // Heroku environment
+            tessDataPath = "/app/.apt/usr/share/tesseract-ocr/4.00/tessdata";
+        } else {
+            // Local environment
+            tessDataPath = new File("src/main/resources/Tesseract-OCR/tessdata").getAbsolutePath();
+        }
+        tesseract.setDatapath(tessDataPath);
 
         // Optional: set the language you want to recognize, e.g., "eng" for English
         tesseract.setLanguage("eng");
