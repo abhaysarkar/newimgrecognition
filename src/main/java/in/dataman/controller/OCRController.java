@@ -6,6 +6,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 @RestController
 @RequestMapping("/api/ocr")
@@ -15,12 +18,15 @@ public class OCRController {
     public String extractText(@RequestParam("file") MultipartFile file) throws IOException {
         // Create a Tesseract instance
         Tesseract tesseract = new Tesseract();
-        
+
         // Detect if running on Heroku or local environment
         String tessDataPath;
         if (System.getenv("DYNO") != null) {
-            // Heroku environment
-            tessDataPath = "/app/.apt/usr/share/tesseract-ocr/4.00/tessdata";
+            // Heroku environment - use tessdata from resources
+            Path tempDir = Files.createTempDirectory("tessdata");
+            Files.copy(getClass().getResourceAsStream("/Tesseract-OCR/tessdata/eng.traineddata"),
+                    tempDir.resolve("eng.traineddata"), StandardCopyOption.REPLACE_EXISTING);
+            tessDataPath = tempDir.toString();
         } else {
             // Local environment
             tessDataPath = new File("src/main/resources/Tesseract-OCR/tessdata").getAbsolutePath();
