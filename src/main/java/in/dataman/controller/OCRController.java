@@ -109,6 +109,56 @@ public class OCRController {
                     .body("Error processing the image: " + e.getMessage());
         }
     }
+
+    private String parseAadharNumber(String text) {
+        String aadharPattern = "\\d{4}\\s*\\d{4}\\s*\\d{4}";
+        Pattern pattern = Pattern.compile(aadharPattern);
+        Matcher matcher = pattern.matcher(text);
+
+        if (matcher.find()) {
+            return matcher.group().replaceAll("\\s+", "");
+        }
+        return "Aadhar number not found";
+    }
+
+    private String parseName(String text) {
+        String[] namePatterns = { "Name[:\\s]*([A-Za-z\\s]+)", "Name\\s*[:\\s]*([A-Za-z\\s]+)",
+                "Name:\\s*([A-Za-z\\s]+)", "Name\\s*([A-Za-z\\s]+)", "([A-Z][a-z]+(?:\\s[A-Z][a-z]+)*)" };
+
+        for (String namePattern : namePatterns) {
+            Pattern pattern = Pattern.compile(namePattern, Pattern.CASE_INSENSITIVE);
+            Matcher matcher = pattern.matcher(text);
+
+            if (matcher.find()) {
+                return matcher.group(1).trim();
+            }
+        }
+
+        return "Name not found";
+    }
+
+    private String parseDOB(String text) {
+        String dobPattern = "DOB[:\\s]*(\\d{2}/\\d{2}/\\d{4})";
+        Pattern pattern = Pattern.compile(dobPattern);
+        Matcher matcher = pattern.matcher(text);
+
+        if (matcher.find()) {
+            return matcher.group(1).trim();
+        }
+        return "Date of Birth not found";
+    }
+
+    private String parseGender(String text) {
+        String genderPattern = "(Male|Female|MALE|FEMALE)";
+        Pattern pattern = Pattern.compile(genderPattern, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(text);
+
+        if (matcher.find()) {
+            return matcher.group(1).toUpperCase();
+        }
+        return "Gender not found";
+    }
+
 }
 
 
