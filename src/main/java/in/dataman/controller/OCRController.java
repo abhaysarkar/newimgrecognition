@@ -10,6 +10,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @RestController
 @RequestMapping("/api/ocr")
 public class OCRController {
@@ -46,6 +53,60 @@ public class OCRController {
         } catch (TesseractException e) {
             e.printStackTrace();
             return "Error reading image";
+        }
+    }
+
+
+
+    @PostMapping("/extract-info")
+    public ResponseEntity<?> extractText(@RequestParam("file") MultipartFile file) throws IOException {
+        // Create a Tesseract instance
+        Tesseract tesseract = new Tesseract();
+
+        // Detect if running on Heroku or local environment
+        String tessDataPath;
+        if (System.getenv("DYNO") != null) {
+            // Heroku environment - use tessdata from resources
+            Path tempDir = Files.createTempDirectory("tessdata");
+            Files.copy(getClass().getResourceAsStream("/Tesseract-OCR/tessdata/eng.traineddata"),
+                    tempDir.resolve("eng.traineddata"), StandardCopyOption.REPLACE_EXISTING);
+            tessDataPath = tempDir.toString();
+        } else {
+            // Local environment
+            tessDataPath = new File("src/main/resources/Tesseract-OCR/tessdata").getAbsolutePath();
+        }
+        tesseract.setDatapath(tessDataPath);
+
+        // Optional: set the language you want to recognize, e.g., "eng" for English
+        tesseract.setLanguage("eng");
+
+        // Convert MultipartFile to File for processing
+        File convFile = new File(System.getProperty("java.io.tmpdir") + "/" + file.getOriginalFilename());
+        file.transferTo(convFile);
+
+        try {
+            // Extract text from image
+        	String text = tesseract.doOCR(convFile);
+        	
+        	System.out.println(parseAadharNumber(text));
+        	System.out.println(parseName(text));
+        	System.out.println(parseDOB(text));
+        	System.out.println(parseGender(text));
+        	
+        	Map<String, String> parsedInfo = new HashMap<>();
+        	
+        	parsedInfo.put("aadhar_number", parseAadharNumber(text));
+            parsedInfo.put("name", parseName(text));
+            parsedInfo.put("dob", parseDOB(text));
+            parsedInfo.put("gender", parseGender(text));
+        	
+            //return text;
+            return ResponseEntity.ok(parsedInfo);
+        } catch (TesseractException e) {
+            e.printStackTrace();
+            //return "Error reading image";
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error processing the image: " + e.getMessage());
         }
     }
 }
