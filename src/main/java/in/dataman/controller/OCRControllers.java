@@ -22,7 +22,7 @@ import net.sourceforge.tess4j.TesseractException;
 
 @RestController
 @RequestMapping("/apii/ocr")
-public class OCRController {
+public class OCRControllers {
 
     @PostMapping("/extract-info")
     public ResponseEntity<?> extractText(@RequestParam("file") MultipartFile file) throws IOException {
