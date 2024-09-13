@@ -59,7 +59,7 @@ public class OCRController {
 
 
     @PostMapping("/extract-info")
-    public ResponseEntity<?> extractText(@RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<?> extractInfo(@RequestParam("file") MultipartFile file) throws IOException {
         // Create a Tesseract instance
         Tesseract tesseract = new Tesseract();
 
