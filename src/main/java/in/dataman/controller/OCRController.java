@@ -76,7 +76,7 @@ import net.sourceforge.tess4j.TesseractException;
 
 @RestController
 @RequestMapping("/apii/ocr")
-public class OCRControllers {
+public class OCRController {
 
     @PostMapping("/extract-info")
     public ResponseEntity<?> extractText(@RequestParam("file") MultipartFile file) throws IOException {
