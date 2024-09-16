@@ -96,9 +96,9 @@ public class OCRController {
         	Map<String, String> parsedInfo = new HashMap<>();
         	
         	parsedInfo.put("aadhar_number", parseAadharNumber(text));
-            parsedInfo.put("name", parseName(text));
-            parsedInfo.put("dob", parseDOB(text));
-            parsedInfo.put("gender", parseGender(text));
+            // parsedInfo.put("name", parseName(text));
+            // parsedInfo.put("dob", parseDOB(text));
+            // parsedInfo.put("gender", parseGender(text));
         	
             //return text;
             return ResponseEntity.ok(parsedInfo);
